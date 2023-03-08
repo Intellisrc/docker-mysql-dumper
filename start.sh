@@ -1,11 +1,13 @@
 #!/bin/bash
-# Will dump all databases separatelly
+# Will dump all databases separatelly and gzip compress them
 
-BACK_HOUR=${BACK_HOUR:-"0"}
-NOW_HOUR=$(date "+%-H")
-if ((NOW_HOUR != BACK_HOUR)); then
-	echo "Backup will run at $BACK_HOUR. Right now is: $NOW_HOUR"
-	exit 0
+# If BACK_HOUR is set, check that it matches
+if [[ "$BACK_HOUR" != "" ]]; then
+	NOW_HOUR=$(date "+%-H")
+	if ((NOW_HOUR != BACK_HOUR)); then
+		echo "Backup will run at $BACK_HOUR. Right now is: $NOW_HOUR"
+		exit 0
+	fi
 fi
 
 STOREIN="/home"

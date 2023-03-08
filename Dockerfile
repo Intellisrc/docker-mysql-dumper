@@ -6,7 +6,7 @@ VOLUME ["/home/"]
 ENV DB_USER=root
 ENV DB_PASS=
 ENV DB_HOST=localhost
-ENV BACK_HOUR=0
+ENV BACK_HOUR=
 
 RUN apk add --update --no-cache mariadb-client
 
