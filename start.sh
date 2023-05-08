@@ -16,12 +16,12 @@ CHARSET="UTF8"
 MYSQLPW=" -u${DB_USER} -p${DB_PASS} -h${DB_HOST} "
 MYSQLPM=" --hex-blob --comments=false --default-character-set=${CHARSET} "
 
-rm "${STOREIN}"/*.gz
+rm -f "${STOREIN}"/*.gz
 while read -r DB; do
 	if [[ "$DB" != "mysql" && "$DB" != "information_schema" && "$DB" != "sys" && "$DB" != "performance_schema" ]]; then
 		echo "Processing [$DB] ... "
 		mysqldump ${MYSQLPW} ${MYSQLPM} ${DB} -r "${STOREIN}/$DB.sql"
-		gzip "${STOREIN}$DB.sql"
+		gzip "${STOREIN}/$DB.sql"
 	fi
 done < <(mysql ${MYSQLPW} -Bse 'show databases')
 
