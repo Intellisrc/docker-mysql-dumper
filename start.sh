@@ -13,16 +13,29 @@ fi
 STOREIN="/home"
 CHARSET="UTF8"
 
-MYSQLPW=" -u${DB_USER} -p${DB_PASS} -h${DB_HOST} "
-MYSQLPM=" --hex-blob --comments=false --default-character-set=${CHARSET} "
+SSL=""
+if [[ "$DB_SSL" == "true" ]]; then
+	SSL="--ssl"
+fi
+PWD=""
+if [[ "$DB_PASS" != "" ]]; then
+	PWD="-p${DB_PASS}"
+fi
 
-rm -f "${STOREIN}"/*.gz
+MYSQLPW="-u${DB_USER:-root} ${PWD} -h${DB_HOST:-localhost} -P${DB_PORT:-3306}"
+MYSQLPM="--hex-blob --comments=false --default-character-set=${CHARSET} $SSL"
+
+# Clean old files
+find $STOREIN -type f -name "*.gz" -mtime +30 -delete
 while read -r DB; do
-	if [[ "$DB" != "mysql" && "$DB" != "information_schema" && "$DB" != "sys" && "$DB" != "performance_schema" ]]; then
-		echo "Processing [$DB] ... "
-		mysqldump ${MYSQLPW} ${MYSQLPM} ${DB} -r "${STOREIN}/$DB.sql"
-		gzip "${STOREIN}/$DB.sql"
-	fi
+	case $DB in
+		mysql|MYSQL|information_schema|INFORMATION_SCHEMA|sys|SYS|performance_schema|PERFORMANCE_SCHEMA);;
+		*)
+			echo "Processing [$DB] ... "
+			mysqldump ${MYSQLPW} ${MYSQLPM} ${DB} -r "${STOREIN}/$DB.sql"
+			rm -f "${STOREIN}/$DB.sql.gz"
+			gzip "${STOREIN}/$DB.sql";;
+	esac
 done < <(mysql ${MYSQLPW} -Bse 'show databases')
 
 exit 0
